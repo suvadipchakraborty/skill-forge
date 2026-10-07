@@ -1,8 +1,8 @@
 const CONFIG = {
   API_KEY: "AQ.Ab8RN6KFGgvEmu3e7cl9Jh0rgOAqJG7rmsuLDzXbD7nxV2PL8A",
-  MODEL: "gemini-1.5-flash",
+  MODEL: "gemini-2.5-flash",
   get ENDPOINT() {
-    return `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent?key=${this.API_KEY}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent`;
   }
 };
 
@@ -78,10 +78,10 @@ Keep each why_learn_it to 1-2 concise sentences.`;
   try {
     const res = await fetch(CONFIG.ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": CONFIG.API_KEY },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+        generationConfig: { temperature: 0.7, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } }
       })
     });
     if (!res.ok) {
