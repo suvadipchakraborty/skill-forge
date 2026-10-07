@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SkillForge – Map Your Professional Future</title>
+<meta name="description" content="Select what you know, and let AI reveal exactly what you need to learn next.">
+<meta name="theme-color" content="#121826">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SkillForge">
+<meta property="og:title" content="SkillForge – Map Your Professional Future">
+<meta property="og:description" content="Select what you know, and let AI reveal exactly what you need to learn next.">
+<meta property="og:url" content="https://skill-forge.suvadipchakraborty.workers.dev/">
+<meta property="og:image" content="https://skill-forge.suvadipchakraborty.workers.dev/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SkillForge – Map Your Professional Future">
+<meta name="twitter:description" content="Select what you know, and let AI reveal exactly what you need to learn next.">
+<meta name="twitter:image" content="https://skill-forge.suvadipchakraborty.workers.dev/preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top"><h1>⚒️ Skill<span>Forge</span></h1></header>
+
+<main>
+  <section id="tab-skills" class="tab active">
+    <div id="picker">
+      <p class="lead">Tap everything you already know. No typing needed.</p>
+      <div id="categories"></div>
+    </div>
+
+    <div id="loading" class="center hidden"><div class="spinner"></div><p>Forging your roadmap…</p></div>
+
+    <div id="results" class="hidden">
+      <div class="res-head">
+        <div>
+          <span class="eyebrow">Your trajectory</span>
+          <h2 id="role"></h2>
+        </div>
+        <button id="shareBtn" class="icon-btn" aria-label="Share">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        </button>
+      </div>
+      <h3 class="sec">💻 Next Technical Skills</h3>
+      <div id="techCards"></div>
+      <h3 class="sec">🤝 Next Soft Skills</h3>
+      <div id="softCards"></div>
+      <button id="backBtn" class="ghost">← Edit my skills</button>
+    </div>
+    <div id="error" class="error hidden"></div>
+  </section>
+
+  <section id="tab-about" class="tab">
+    <div class="about">
+      <div class="logo">⚒️</div>
+      <h2>SkillForge</h2>
+      <p class="lead">Map your professional future. Select what you know, and let AI reveal exactly what you need to learn next.</p>
+      <ul class="features">
+        <li><b>👆 Zero-typing selection</b><span>Just tap the skills you have.</span></li>
+        <li><b>🧠 AI-inferred trajectory</b><span>See where your career is heading.</span></li>
+        <li><b>🎯 High-ROI recommendations</b><span>The next skills worth your time.</span></li>
+      </ul>
+      <button id="installBtn" class="cta">⬇️ Install App</button>
+      <p id="installHint" class="muted hidden"></p>
+      <p class="muted">Built by Suva · Powered by the Gemini 1.5 Flash AI model</p>
+    </div>
+  </section>
+</main>
+
+<div id="actionBar"><button id="generateBtn" class="cta" disabled>Generate My Next Move<small id="count"></small></button></div>
+
+<nav class="bottom">
+  <button class="nav active" data-tab="skills"><span>🧭</span>My Skills</button>
+  <button class="nav" data-tab="about"><span>ℹ️</span>About</button>
+</nav>
+<script src="app.js"></script>
+</body>
+</html>
