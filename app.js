@@ -1,8 +1,8 @@
 const CONFIG = {
   API_KEY: "AQ.Ab8RN6LqjYwzLaqAvSZk3KuzNd4WbhaK1J2_IuvoEKgdjjnEPg",
-  MODEL: "gemini-flash-latest",
-  get ENDPOINT() {
-    return `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent`;
+  MODELS: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-flash-lite"],
+  endpoint(model) {
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   }
 };
 
@@ -76,18 +76,27 @@ Return ONLY a raw JSON object, with no markdown, no code fences and no extra tex
 Keep each why_learn_it to 1-2 concise sentences.`;
 
   try {
-    const res = await fetch(CONFIG.ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": CONFIG.API_KEY },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
-      })
+    const body = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
     });
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      throw new Error(e.error?.message || `Request failed (${res.status})`);
+    let res, lastErr;
+    for (const model of CONFIG.MODELS) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        res = await fetch(CONFIG.endpoint(model), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": CONFIG.API_KEY },
+          body
+        });
+        if (res.ok) break;
+        const e = await res.json().catch(() => ({}));
+        lastErr = new Error(e.error?.message || `Request failed (${res.status})`);
+        if (![429, 500, 503].includes(res.status)) throw lastErr; // real error, don't retry
+        await new Promise(r => setTimeout(r, 1200));
+      }
+      if (res.ok) break;
     }
+    if (!res.ok) throw lastErr;
     const data = await res.json();
     const raw = data.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
     const json = JSON.parse(raw.replace(/```json|```/g, "").trim());
