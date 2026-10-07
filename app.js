@@ -1,6 +1,6 @@
 const CONFIG = {
-  API_KEY: "AQ.Ab8RN6KFGgvEmu3e7cl9Jh0rgOAqJG7rmsuLDzXbD7nxV2PL8A",
-  MODEL: "gemini-2.5-flash",
+  API_KEY: "AQ.Ab8RN6LqjYwzLaqAvSZk3KuzNd4WbhaK1J2_IuvoEKgdjjnEPg",
+  MODEL: "gemini-flash-latest",
   get ENDPOINT() {
     return `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent`;
   }
@@ -81,7 +81,7 @@ Keep each why_learn_it to 1-2 concise sentences.`;
       headers: { "Content-Type": "application/json", "x-goog-api-key": CONFIG.API_KEY },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } }
+        generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
       })
     });
     if (!res.ok) {

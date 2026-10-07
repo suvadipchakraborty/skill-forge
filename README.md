@@ -15,4 +15,4 @@ Edit the `CONFIG` object at the top of `app.js` (API key, model).
 ## Files
 `index.html` `styles.css` `app.js` `manifest.json` `sw.js` plus `icon.svg`, `icon-192.png`, `icon-512.png`, `preview.png` (social share image, 1200×630).
 
-Built by Suva · Powered by Gemini 2.5 Flash
+Built by Suva · Powered by Gemini Flash
