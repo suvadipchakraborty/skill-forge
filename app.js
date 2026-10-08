@@ -1,21 +1,15 @@
-const CONFIG = {
-  API_KEY: "AQ.Ab8RN6LqjYwzLaqAvSZk3KuzNd4WbhaK1J2_IuvoEKgdjjnEPg",
-  MODELS: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-flash-lite"],
-  endpoint(model) {
-    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  }
-};
-
 const SKILLS = {
-  "Languages": ["Python","JavaScript","TypeScript","Java","C#","C++","Go","Rust","Kotlin","Swift","PHP","Ruby","R","Bash"],
-  "Frontend & Mobile": ["HTML/CSS","React","Vue","Angular","Next.js","Tailwind","React Native","Flutter","Figma","Accessibility"],
-  "Backend & APIs": ["Node.js","Django","Flask","Spring Boot",".NET","FastAPI","REST APIs","GraphQL","Microservices","System Design"],
-  "Data & Databases": ["SQL","PostgreSQL","MongoDB","Redis","Excel","Tableau","Power BI","Pandas","Spark","Data Modeling"],
-  "AI & ML": ["Machine Learning","Deep Learning","TensorFlow","PyTorch","NLP","Prompt Engineering","LLM Apps","Computer Vision","Statistics"],
-  "Cloud & DevOps": ["AWS","Azure","GCP","Docker","Kubernetes","Terraform","CI/CD","Linux","Git","Monitoring"],
-  "Security & QA": ["Cybersecurity","Pen Testing","IAM","Unit Testing","Test Automation","Selenium"],
-  "Product & Business": ["Product Management","Roadmapping","Market Research","SEO","Digital Marketing","Financial Modeling","UX Research","Data Analysis"],
-  "Process & Leadership": ["Agile","Scrum","Kanban","Jira","Project Management","Team Leadership","Mentoring","Stakeholder Management"],
+  "Programming & Query": ["Python","SQL","R","Scala","Julia","Bash","Git","Jupyter Notebooks"],
+  "Data Engineering": ["ETL/ELT","Data Pipelines","Apache Spark","PySpark","Airflow","dbt","Kafka","Databricks","Delta Lake","Streaming Data"],
+  "Databases & Warehousing": ["PostgreSQL","MySQL","SQL Server","MongoDB","Snowflake","BigQuery","Redshift","Data Modeling","Dimensional Modeling","Data Lakehouse"],
+  "Analytics & BI": ["Excel","Power BI","Tableau","Looker","Qlik","Data Visualization","Dashboard Design","Descriptive Analytics","Cohort Analysis","KPI Design"],
+  "Statistics & Experimentation": ["Statistics","Probability","Hypothesis Testing","Regression","A/B Testing","Time Series","Forecasting","Causal Inference","Bayesian Methods","EDA","Pandas","NumPy"],
+  "Machine Learning": ["Supervised Learning","Unsupervised Learning","Scikit-learn","XGBoost","Feature Engineering","Model Evaluation","Deep Learning","TensorFlow","PyTorch","NLP","Computer Vision","Recommender Systems","Anomaly Detection"],
+  "Generative AI & LLMs": ["Prompt Engineering","LLM Apps","RAG","Embeddings","Vector Databases","Fine-Tuning","LangChain","LlamaIndex","AI Agents","Hugging Face","LLM Evaluation","Gemini / OpenAI / Claude APIs"],
+  "MLOps & Cloud": ["MLOps","MLflow","Model Deployment","Docker","AWS","Azure","GCP","CI/CD for ML","Feature Stores","Model Monitoring"],
+  "Governance & Responsible AI": ["Data Governance","Data Quality","Data Lineage","Metadata Management","Master Data Management","Data Privacy","Responsible AI","Model Risk Management","Explainable AI (SHAP)","AI Ethics"],
+  "Business & Domain": ["Business Analysis","Data Storytelling","Product Analytics","Financial Modeling","Requirements Gathering","Data Strategy","Market Research","Domain Knowledge"],
+  "Delivery & Leadership": ["Agile","Scrum","Jira","Project Management","Team Leadership","Mentoring","Stakeholder Management","Change Management"],
   "Soft Skills": ["Public Speaking","Negotiation","Communication","Critical Thinking","Problem Solving","Time Management","Storytelling","Emotional Intelligence","Adaptability","Conflict Resolution","Creativity","Collaboration"]
 };
 
@@ -61,45 +55,20 @@ function syncBar() {
   $("actionBar").classList.toggle("off", !onSkills || !$("picker").offsetParent);
 }
 
-// ---------- Gemini ----------
+// ---------- AI (via /api/generate Worker; API key is a Cloudflare secret) ----------
 async function generate() {
   const skills = [...selected];
   $("error").classList.add("hidden");
   $("picker").classList.add("hidden"); $("loading").classList.remove("hidden"); syncBar();
 
-  const prompt = `You are an expert career advisor. A professional currently has these skills: ${skills.join(", ")}.
-Infer their current career trajectory and recommend the highest-ROI skills they should learn next. Do not recommend skills they already have.
-Return ONLY a raw JSON object, with no markdown, no code fences and no extra text, in exactly this shape:
-{"inferred_role":"short string e.g. Mid-Level Full Stack Developer",
-"next_technical_skills":[{"skill_name":"","why_learn_it":""},{"skill_name":"","why_learn_it":""},{"skill_name":"","why_learn_it":""}],
-"next_soft_skills":[{"skill_name":"","why_learn_it":""},{"skill_name":"","why_learn_it":""}]}
-Keep each why_learn_it to 1-2 concise sentences.`;
-
   try {
-    const body = JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skills })
     });
-    let res, lastErr;
-    for (const model of CONFIG.MODELS) {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        res = await fetch(CONFIG.endpoint(model), {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": CONFIG.API_KEY },
-          body
-        });
-        if (res.ok) break;
-        const e = await res.json().catch(() => ({}));
-        lastErr = new Error(e.error?.message || `Request failed (${res.status})`);
-        if (![429, 500, 503].includes(res.status)) throw lastErr; // real error, don't retry
-        await new Promise(r => setTimeout(r, 1200));
-      }
-      if (res.ok) break;
-    }
-    if (!res.ok) throw lastErr;
-    const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
-    const json = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
     if (!json.inferred_role || !Array.isArray(json.next_technical_skills) || !Array.isArray(json.next_soft_skills)) throw new Error("Unexpected AI response format.");
     lastResult = json; renderResults(json);
   } catch (err) {
