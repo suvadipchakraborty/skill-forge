@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://apps.suvadipchakraborty.workers.dev/sitemap.xml
